@@ -92,4 +92,4 @@ jobs:
                 aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
                 aws-region: 'us-east-2'
             - name: deploy
-              run: cdk deploy
+              run: cdk deploy --all --require-approval never
