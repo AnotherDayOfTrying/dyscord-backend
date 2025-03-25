@@ -16,7 +16,7 @@ jobs:
               with:
                 go-version-file: 'go.mod'
                 check-latest: true
-                cache-dependency-cache: |
+                cache-dependency-path: |
                     go.sum
             - name: install dependencies
               run: go get
@@ -46,13 +46,19 @@ jobs:
               with:
                 go-version-file: 'go.mod'
                 check-latest: true
-                cache-dependency-cache: |
+                cache-dependency-path: |
                     go.sum
+            - name: setup node
+              uses: actions/setup-node@v4
+              with:
+                node-version: 20
             - name: load cache
               uses: actions/cache@v4
               with:
                 path: ./lambdas/websocket/out
                 key: cache-${{ github.sha }}
+            - name: install cdk
+              run: npm i -g aws-cdk
             - name: run synth
               run: cdk synth
     Deploy:
@@ -66,13 +72,19 @@ jobs:
               with:
                 go-version-file: 'go.mod'
                 check-latest: true
-                cache-dependency-cache: |
+                cache-dependency-path: |
                     go.sum
+            - name: setup node
+              uses: actions/setup-node@v4
+              with:
+                node-version: 20
             - name: load cache
               uses: actions/cache@v4
               with:
                 path: ./lambdas/websocket/out
                 key: cache-${{ github.sha }}
+            - name: install cdk
+              run: npm i -g aws-cdk
             - name: setup aws cdk
               uses: aws-actions/configure-aws-credentials@v4
               with:
