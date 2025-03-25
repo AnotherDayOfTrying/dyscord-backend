@@ -26,22 +26,22 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 
 	connectHandler := lambda.NewFunction(stack, jsii.String("connect"), &lambda.FunctionProps{
 		Runtime:      lambda.Runtime_PROVIDED_AL2023(),
-		Handler:      jsii.String("connect"),
-		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/out", dir), nil),
+		Handler:      jsii.String("bootstrap"),
+		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/connect", dir), nil),
 		Architecture: lambda.Architecture_ARM_64(),
 	})
 
 	disconnectHandler := lambda.NewFunction(stack, jsii.String("disconnect"), &lambda.FunctionProps{
 		Runtime:      lambda.Runtime_PROVIDED_AL2023(),
-		Handler:      jsii.String("disconnect"),
-		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/out", dir), nil),
+		Handler:      jsii.String("bootstrap"),
+		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/disconnect", dir), nil),
 		Architecture: lambda.Architecture_ARM_64(),
 	})
 
 	defaultHandler := lambda.NewFunction(stack, jsii.String("default"), &lambda.FunctionProps{
 		Runtime:      lambda.Runtime_PROVIDED_AL2023(),
-		Handler:      jsii.String("default"),
-		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/out", dir), nil),
+		Handler:      jsii.String("bootstrap"),
+		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/default", dir), nil),
 		Architecture: lambda.Architecture_ARM_64(),
 	})
 

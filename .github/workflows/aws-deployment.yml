@@ -21,18 +21,18 @@ jobs:
             - name: install dependencies
               run: go get
             - name: build lambda
-              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/connect ./connect/connect.go
-              working-directory: ./lambdas/websocket/
+              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o bootstrap ./connect.go
+              working-directory: ./lambdas/websocket/connect
             - name: build lambda
-              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/default ./default/default.go
-              working-directory: ./lambdas/websocket/
+              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o bootstrap ./default.go
+              working-directory: ./lambdas/websocket/default
             - name: build lambda
-              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/disconnect ./disconnect/disconnect.go
-              working-directory: ./lambdas/websocket/
+              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o bootstrap ./disconnect.go
+              working-directory: ./lambdas/websocket/disconnect
             - name: cache lambdas
               uses: actions/cache@v4
               with:
-                path: ./lambdas/websocket/out
+                path: ./lambdas/websocket
                 key: cache-${{ github.sha }}
 
     Synth:
@@ -55,7 +55,7 @@ jobs:
             - name: load cache
               uses: actions/cache@v4
               with:
-                path: ./lambdas/websocket/out
+                path: ./lambdas/websocket
                 key: cache-${{ github.sha }}
             - name: install cdk
               run: npm i -g aws-cdk
@@ -81,7 +81,7 @@ jobs:
             - name: load cache
               uses: actions/cache@v4
               with:
-                path: ./lambdas/websocket/out
+                path: ./lambdas/websocket
                 key: cache-${{ github.sha }}
             - name: install cdk
               run: npm i -g aws-cdk
