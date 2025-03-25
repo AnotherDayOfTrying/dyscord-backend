@@ -27,7 +27,7 @@ jobs:
               run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/default ./default/default.go
               working-directory: ./lambdas/websocket/
             - name: build lambda
-              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/disconnect ./connect/disconnect.go
+              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/disconnect ./disconnect/disconnect.go
               working-directory: ./lambdas/websocket/
             - name: cache lambdas
               uses: actions/cache@v4
