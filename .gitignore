@@ -18,5 +18,4 @@
 .cdk.staging
 cdk.out
 
-lambdas\websocket\out
-.\lambdas\websocket\out\*
+lambdas/websocket/out

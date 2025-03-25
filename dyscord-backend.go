@@ -1,8 +1,12 @@
 package main
 
 import (
+	"os"
+
 	"github.com/aws/aws-cdk-go/awscdk/v2"
-	// "github.com/aws/aws-cdk-go/awscdk/v2/awssqs"
+	apigw "github.com/aws/aws-cdk-go/awscdk/v2/awsapigatewayv2"
+	apigw_integrations "github.com/aws/aws-cdk-go/awscdk/v2/awsapigatewayv2integrations"
+	lambda "github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
@@ -18,12 +22,47 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
-	// The code that defines your stack goes here
+	dir, _ := os.Getwd()
 
-	// example resource
-	// queue := awssqs.NewQueue(stack, jsii.String("DyscordBackendQueue"), &awssqs.QueueProps{
-	// 	VisibilityTimeout: awscdk.Duration_Seconds(jsii.Number(300)),
-	// })
+	connectHandler := lambda.NewFunction(stack, jsii.String("connect"), &lambda.FunctionProps{
+		Runtime:      lambda.Runtime_PROVIDED_AL2023(),
+		Handler:      jsii.String("connect"),
+		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/out", dir), nil),
+		Architecture: lambda.Architecture_ARM_64(),
+	})
+
+	disconnectHandler := lambda.NewFunction(stack, jsii.String("disconnect"), &lambda.FunctionProps{
+		Runtime:      lambda.Runtime_PROVIDED_AL2023(),
+		Handler:      jsii.String("disconnect"),
+		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/out", dir), nil),
+		Architecture: lambda.Architecture_ARM_64(),
+	})
+
+	defaultHandler := lambda.NewFunction(stack, jsii.String("default"), &lambda.FunctionProps{
+		Runtime:      lambda.Runtime_PROVIDED_AL2023(),
+		Handler:      jsii.String("default"),
+		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/out", dir), nil),
+		Architecture: lambda.Architecture_ARM_64(),
+	})
+
+	webSocketApi := apigw.NewWebSocketApi(stack, jsii.String("DyscordWSAPI"), &apigw.WebSocketApiProps{
+		ConnectRouteOptions: &apigw.WebSocketRouteOptions{
+			Integration: apigw_integrations.NewWebSocketLambdaIntegration(jsii.String("ConnectIntegration"), connectHandler, nil),
+		},
+		DisconnectRouteOptions: &apigw.WebSocketRouteOptions{
+			Integration: apigw_integrations.NewWebSocketLambdaIntegration(jsii.String("DisconnectIntegration"), disconnectHandler, nil),
+		},
+		DefaultRouteOptions: &apigw.WebSocketRouteOptions{
+			Integration: apigw_integrations.NewWebSocketLambdaIntegration(jsii.String("DefaultIntegration"), defaultHandler, nil),
+		},
+	})
+
+	apigw.NewWebSocketStage(stack, jsii.String("DyscordWS"), &apigw.WebSocketStageProps{
+		WebSocketApi: webSocketApi,
+		StageName:    jsii.String("dev"),
+		Description:  jsii.String("My Stage"),
+		AutoDeploy:   jsii.Bool(true),
+	})
 
 	return stack
 }

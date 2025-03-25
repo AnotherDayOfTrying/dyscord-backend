@@ -1,0 +1,81 @@
+name: AWS Deployment
+run-name: ${{github.actor}} is Deploying AWS Backend Infrastructure
+permissions: read-all
+on:
+    push:
+        branches:
+            - main
+jobs:
+    Build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout
+              uses: actions/checkout@v4
+            - name: setup go
+              uses: actions/setup-go@v5
+              with:
+                go-version-file: 'go.mod'
+                check-latest: true
+                cache-dependency-cache: |
+                    go.sum
+            - name: install dependencies
+              run: go get
+            - name: build lambda
+              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/connect ./websocket/connect/connect.go && zip connect.zip connect
+              working-directory: ./lambdas/websocket/
+            - name: build lambda
+              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/default ./websocket/default/default.go && zip default.zip default
+              working-directory: ./lambdas/websocket/
+            - name: build lambda
+              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/disconnect ./websocket/connect/disconnect.go && zip disconnect.zip disconnect
+              working-directory: ./lambdas/websocket/
+            - name: cache lambdas
+              uses: actions/cache@v4
+              with:
+                path: ./lambdas/websocket/out
+                key: cache-${{ github.sha }}
+
+    Synth:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout
+              uses: actions/checkout@v4
+            - name: setup go
+              uses: actions/setup-go@v5
+              with:
+                go-version-file: 'go.mod'
+                check-latest: true
+                cache-dependency-cache: |
+                    go.sum
+            - name: load cache
+              uses: actions/cache@v4
+              with:
+                path: ./lambdas/websocket/out
+                key: cache-${{ github.sha }}
+            - name: run synth
+              run: cdk synth
+    Deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout
+              uses: actions/checkout@v4
+            - name: setup go
+              uses: actions/setup-go@v5
+              with:
+                go-version-file: 'go.mod'
+                check-latest: true
+                cache-dependency-cache: |
+                    go.sum
+            - name: load cache
+              uses: actions/cache@v4
+              with:
+                path: ./lambdas/websocket/out
+                key: cache-${{ github.sha }}
+            - name: setup aws cdk
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+                aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+                aws-region: 'us-east-2'
+            - name: deploy
+              run: cdk deploy
