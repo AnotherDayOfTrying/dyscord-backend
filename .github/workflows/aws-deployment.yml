@@ -21,13 +21,13 @@ jobs:
             - name: install dependencies
               run: go get
             - name: build lambda
-              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/connect ./websocket/connect/connect.go && zip connect.zip connect
+              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/connect ./connect/connect.go
               working-directory: ./lambdas/websocket/
             - name: build lambda
-              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/default ./websocket/default/default.go && zip default.zip default
+              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/default ./default/default.go
               working-directory: ./lambdas/websocket/
             - name: build lambda
-              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/disconnect ./websocket/connect/disconnect.go && zip disconnect.zip disconnect
+              run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./out/disconnect ./connect/disconnect.go
               working-directory: ./lambdas/websocket/
             - name: cache lambdas
               uses: actions/cache@v4
@@ -37,6 +37,7 @@ jobs:
 
     Synth:
         runs-on: ubuntu-latest
+        needs: Build
         steps:
             - name: checkout
               uses: actions/checkout@v4
@@ -56,6 +57,7 @@ jobs:
               run: cdk synth
     Deploy:
         runs-on: ubuntu-latest
+        needs: Synth
         steps:
             - name: checkout
               uses: actions/checkout@v4
