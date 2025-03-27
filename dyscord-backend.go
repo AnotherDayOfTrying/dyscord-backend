@@ -98,7 +98,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 				RequestTemplates: &map[string]*string{
 					"application/json": jsii.String(string(connectRequestTemplate)),
 				},
-				TemplateSelectionExpression: jsii.String("\\$default"),
+				TemplateSelectionExpression: jsii.String("\\$connect"),
 			}),
 			ReturnResponse: jsii.Bool(true),
 		},
