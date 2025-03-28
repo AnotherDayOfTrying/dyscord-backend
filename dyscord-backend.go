@@ -11,6 +11,7 @@ import (
 	apigw_integrations "github.com/aws/aws-cdk-go/awscdk/v2/awsapigatewayv2integrations"
 	dynamodb "github.com/aws/aws-cdk-go/awscdk/v2/awsdynamodb"
 	lambda "github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awslogs"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
@@ -42,6 +43,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		Handler:      jsii.String("bootstrap"),
 		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/connect", dir), nil),
 		Architecture: lambda.Architecture_ARM_64(),
+		LogRetention: awslogs.RetentionDays_ONE_WEEK,
 	})
 
 	disconnectHandler := lambda.NewFunction(stack, jsii.String("disconnect"), &lambda.FunctionProps{
@@ -49,6 +51,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		Handler:      jsii.String("bootstrap"),
 		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/disconnect", dir), nil),
 		Architecture: lambda.Architecture_ARM_64(),
+		LogRetention: awslogs.RetentionDays_ONE_WEEK,
 	})
 
 	defaultHandler := lambda.NewFunction(stack, jsii.String("default"), &lambda.FunctionProps{
@@ -56,6 +59,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		Handler:      jsii.String("bootstrap"),
 		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/default", dir), nil),
 		Architecture: lambda.Architecture_ARM_64(),
+		LogRetention: awslogs.RetentionDays_ONE_WEEK,
 	})
 
 	createCallHandler := lambda.NewFunction(stack, jsii.String("createcall"), &lambda.FunctionProps{
@@ -63,6 +67,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		Handler:      jsii.String("bootstrap"),
 		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/createCall", dir), nil),
 		Architecture: lambda.Architecture_ARM_64(),
+		LogRetention: awslogs.RetentionDays_ONE_WEEK,
 	})
 
 	joinCallHandler := lambda.NewFunction(stack, jsii.String("joinCall"), &lambda.FunctionProps{
@@ -70,6 +75,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		Handler:      jsii.String("bootstrap"),
 		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/joinCall", dir), nil),
 		Architecture: lambda.Architecture_ARM_64(),
+		LogRetention: awslogs.RetentionDays_ONE_WEEK,
 	})
 
 	leaveCallHandler := lambda.NewFunction(stack, jsii.String("leaveCall"), &lambda.FunctionProps{
@@ -77,6 +83,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		Handler:      jsii.String("bootstrap"),
 		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/leaveCall", dir), nil),
 		Architecture: lambda.Architecture_ARM_64(),
+		LogRetention: awslogs.RetentionDays_ONE_WEEK,
 	})
 
 	sendMessageHandler := lambda.NewFunction(stack, jsii.String("sendMessage"), &lambda.FunctionProps{
@@ -84,6 +91,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		Handler:      jsii.String("bootstrap"),
 		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/sendMessage", dir), nil),
 		Architecture: lambda.Architecture_ARM_64(),
+		LogRetention: awslogs.RetentionDays_ONE_WEEK,
 	})
 
 	connectRequestTemplate, _ := json.Marshal(map[string]interface{}{
