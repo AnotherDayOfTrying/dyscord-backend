@@ -87,7 +87,6 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 	})
 
 	connectRequestTemplate, _ := json.Marshal(map[string]interface{}{
-		"statusCode":   jsii.Number(200),
 		"connectionId": "$context.connectionId",
 	})
 
@@ -96,9 +95,9 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 			// Integration: apigw_integrations.NewWebSocketLambdaIntegration(jsii.String("ConnectIntegration"), connectHandler, nil),
 			Integration: apigw_integrations.NewWebSocketMockIntegration(jsii.String("ConnectionMockIntegration"), &apigw_integrations.WebSocketMockIntegrationProps{
 				RequestTemplates: &map[string]*string{
-					"application/json": jsii.String(string(connectRequestTemplate)),
+					"\\$default": jsii.String(string(connectRequestTemplate)),
 				},
-				TemplateSelectionExpression: jsii.String("\\$connect"),
+				TemplateSelectionExpression: jsii.String("\\$default"),
 			}),
 			ReturnResponse: jsii.Bool(true),
 		},
@@ -125,7 +124,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		ReturnResponse: jsii.Bool(true),
 	})
 
-	webSocketApi.AddRoute(jsii.String("LeaveCall"), &apigw.WebSocketRouteOptions{
+	webSocketApi.AddRoute(jsii.String("leaveCall"), &apigw.WebSocketRouteOptions{
 		Integration:    apigw_integrations.NewWebSocketLambdaIntegration(jsii.String("LeaveCall"), leaveCallHandler, nil),
 		ReturnResponse: jsii.Bool(true),
 	})

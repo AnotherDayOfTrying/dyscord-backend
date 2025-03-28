@@ -7,10 +7,16 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+type APIGatewayProxyRequest struct {
+	events.APIGatewayProxyRequest
+	ConnectionId string `json:"connectionId"`
+}
+
+func handler(request APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	responseBody, err := json.Marshal(map[string]string{
-		"message": "Connected!",
+		"message":      "Connected!",
+		"connectionId": request.ConnectionId,
 	})
 
 	if err != nil {
