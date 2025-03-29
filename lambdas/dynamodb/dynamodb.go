@@ -16,6 +16,7 @@ type Call struct {
 	ConnectionIds              []string `dynamodbav:"connection_ids"`
 	Type                       string   `dynamodbav:"type"`
 	SessionDescriptionProtocol string   `dynamodbav:"sdp"`
+	TTL                        int64    `dynamodbav:"ttl"`
 }
 
 func (call Call) GetKey() map[string]types.AttributeValue {

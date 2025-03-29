@@ -35,7 +35,8 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 			Name: jsii.String("call_id"),
 			Type: dynamodb.AttributeType_STRING,
 		},
-		BillingMode: dynamodb.BillingMode_PAY_PER_REQUEST,
+		BillingMode:         dynamodb.BillingMode_PAY_PER_REQUEST,
+		TimeToLiveAttribute: jsii.String("ttl"),
 	})
 
 	connectHandler := lambda.NewFunction(stack, jsii.String("connect"), &lambda.FunctionProps{

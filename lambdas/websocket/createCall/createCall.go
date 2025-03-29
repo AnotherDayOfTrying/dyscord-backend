@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -52,6 +53,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 		ConnectionIds:              []string{}, //make connectionids
 		Type:                       requestBody.Type,
 		SessionDescriptionProtocol: requestBody.SessionDescriptionProtocol, // make sdp
+		TTL:                        time.Now().Add(time.Hour * 24).Unix(),
 	})
 
 	if err != nil {
