@@ -101,15 +101,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 
 	webSocketApi := apigw.NewWebSocketApi(stack, jsii.String("DyscordWSAPI"), &apigw.WebSocketApiProps{
 		ConnectRouteOptions: &apigw.WebSocketRouteOptions{
-			// Integration: apigw_integrations.NewWebSocketLambdaIntegration(jsii.String("ConnectIntegration"), connectHandler, nil),
-			Integration: apigw_integrations.NewWebSocketAwsIntegration(jsii.String("ConnectionMockIntegration"), &apigw_integrations.WebSocketAwsIntegrationProps{
-				IntegrationUri: connectHandler.FunctionArn(),
-				RequestTemplates: &map[string]*string{
-					"\\$default": jsii.String(string(connectRequestTemplate)),
-				},
-				TemplateSelectionExpression: jsii.String("\\$default"),
-			}),
-			ReturnResponse: jsii.Bool(true),
+			Integration: apigw_integrations.NewWebSocketLambdaIntegration(jsii.String("ConnectionIntegration"), connectHandler, nil),
 		},
 		DisconnectRouteOptions: &apigw.WebSocketRouteOptions{
 			Integration: apigw_integrations.NewWebSocketLambdaIntegration(jsii.String("DisconnectIntegration"), disconnectHandler, nil),
@@ -118,6 +110,22 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 			Integration: apigw_integrations.NewWebSocketLambdaIntegration(jsii.String("DefaultIntegration"), defaultHandler, nil),
 		},
 	})
+
+	webSocketApi.AddRoute(jsii.String("connectionId"), &apigw.WebSocketRouteOptions{
+		Integration: apigw_integrations.NewWebSocketMockIntegration(jsii.String("connectionId"), &apigw_integrations.WebSocketMockIntegrationProps{
+			RequestTemplates: &map[string]*string{
+				"\\$default": jsii.String(string(connectRequestTemplate)),
+			},
+			TemplateSelectionExpression: jsii.String("\\$default"),
+		}),
+		ReturnResponse: jsii.Bool(true),
+	})
+
+	// apigw.NewCfnRouteResponse(stack, jsii.String("connectionIdRouteResponse"), &apigw.CfnRouteResponseProps{
+	// 	ApiId: webSocketApi.ApiId(),
+	// 	RouteId: connectionIdRoute.RouteId(),
+
+	// })
 
 	webSocketApi.AddRoute(jsii.String("createCall"), &apigw.WebSocketRouteOptions{
 		Integration:    apigw_integrations.NewWebSocketLambdaIntegration(jsii.String("CreateCall"), createCallHandler, nil),
