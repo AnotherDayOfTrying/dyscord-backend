@@ -39,6 +39,8 @@ func init() {
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var requestBody Request
+	log.Printf("%v", request.Body)
+
 	if err := json.Unmarshal([]byte(request.Body), &requestBody); err == nil {
 		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Could not parse body"}, nil
 	}

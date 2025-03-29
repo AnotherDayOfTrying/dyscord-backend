@@ -32,7 +32,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 	database := dynamodb.NewTable(stack, jsii.String("DyscordDB"), &dynamodb.TableProps{
 		TableName: jsii.String(dyscordconfig.TABLENAME),
 		PartitionKey: &dynamodb.Attribute{
-			Name: jsii.String("room_id"),
+			Name: jsii.String("call_id"),
 			Type: dynamodb.AttributeType_STRING,
 		},
 		BillingMode: dynamodb.BillingMode_PAY_PER_REQUEST,
