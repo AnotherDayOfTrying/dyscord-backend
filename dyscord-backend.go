@@ -102,7 +102,8 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 	webSocketApi := apigw.NewWebSocketApi(stack, jsii.String("DyscordWSAPI"), &apigw.WebSocketApiProps{
 		ConnectRouteOptions: &apigw.WebSocketRouteOptions{
 			// Integration: apigw_integrations.NewWebSocketLambdaIntegration(jsii.String("ConnectIntegration"), connectHandler, nil),
-			Integration: apigw_integrations.NewWebSocketMockIntegration(jsii.String("ConnectionMockIntegration"), &apigw_integrations.WebSocketMockIntegrationProps{
+			Integration: apigw_integrations.NewWebSocketAwsIntegration(jsii.String("ConnectionMockIntegration"), &apigw_integrations.WebSocketAwsIntegrationProps{
+				IntegrationUri: connectHandler.FunctionArn(),
 				RequestTemplates: &map[string]*string{
 					"\\$default": jsii.String(string(connectRequestTemplate)),
 				},
