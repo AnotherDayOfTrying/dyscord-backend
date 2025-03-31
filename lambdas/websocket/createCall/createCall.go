@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -48,12 +50,15 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 
 	log.Printf("%v", requestBody)
 
+	hasher := sha1.New()
+	hasher.Write([]byte(time.Now().GoString()))
+	sha1_hash := hex.EncodeToString(hasher.Sum(nil))[:6]
+
 	err := db.CreateCall(ctx, dynamodbclient.Call{
-		CallId:                     "111111",   // !!!TODO: CHANGE THIS
-		ConnectionIds:              []string{}, //make connectionids
-		Type:                       requestBody.Type,
-		SessionDescriptionProtocol: requestBody.SessionDescriptionProtocol, // make sdp
-		TTL:                        time.Now().Add(time.Hour * 24).Unix(),
+		CallId:         sha1_hash,
+		ConnectionIds:  []string{}, //make connectionids
+		ConnectionSdps: []dynamodbclient.SDP{},
+		TTL:            time.Now().Add(time.Hour * 24).Unix(),
 	})
 
 	if err != nil {

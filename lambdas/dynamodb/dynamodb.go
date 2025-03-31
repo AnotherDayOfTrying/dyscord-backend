@@ -12,20 +12,24 @@ import (
 )
 
 type Call struct {
-	CallId                     string   `dynamodbav:"call_id"`
-	ConnectionIds              []string `dynamodbav:"connection_ids"`
-	Type                       string   `dynamodbav:"type"`
-	SessionDescriptionProtocol string   `dynamodbav:"sdp"`
-	TTL                        int64    `dynamodbav:"ttl"`
+	CallId         string   `dynamodbav:"call_id"`
+	ConnectionIds  []string `dynamodbav:"connection_ids"`
+	ConnectionSdps []SDP    `dynamodbav:"connection_sdps"`
+	TTL            int64    `dynamodbav:"ttl"`
+}
+
+type SDP struct {
+	Type                       string `dynamodbav:"type"`
+	SessionDescriptionProtocol string `dynamodbav:"sdp"`
 }
 
 func (call Call) GetKey() map[string]types.AttributeValue {
-	roomId, err := attributevalue.Marshal(call.CallId)
+	callId, err := attributevalue.Marshal(call.CallId)
 	if err != nil {
 		panic(err)
 	}
 
-	return map[string]types.AttributeValue{"test": roomId}
+	return map[string]types.AttributeValue{"S": callId}
 }
 
 type CallDatabase struct {
