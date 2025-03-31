@@ -169,16 +169,6 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		gateway.GrantManagementApiAccess(f)
 	}
 
-	apigw.NewCfnIntegrationResponse(stack, jsii.String("connectionIdIntegrationResponse"), &apigw.CfnIntegrationResponseProps{
-		ApiId:                       webSocketApi.ApiId(),
-		IntegrationId:               jsii.String("connectionIdResponse"),
-		IntegrationResponseKey:      jsii.String("/2\\d\\d/"),
-		TemplateSelectionExpression: jsii.String("\\$default"),
-		ResponseTemplates: map[string]*string{
-			"\\$default": jsii.String(string(connectRequestTemplate)),
-		},
-	})
-
 	return stack
 }
 
