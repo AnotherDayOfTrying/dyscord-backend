@@ -112,7 +112,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		},
 	})
 
-	route := webSocketApi.AddRoute(jsii.String("connectionId"), &apigw.WebSocketRouteOptions{
+	webSocketApi.AddRoute(jsii.String("connectionId"), &apigw.WebSocketRouteOptions{
 		Integration: apigw_integrations.NewWebSocketMockIntegration(jsii.String("connectionId"), &apigw_integrations.WebSocketMockIntegrationProps{
 			RequestTemplates: &map[string]*string{
 				"\\$default": jsii.String(string(connectRequestTemplate)),
@@ -120,16 +120,6 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 			TemplateSelectionExpression: jsii.String("\\$default"),
 		}),
 		ReturnResponse: jsii.Bool(true),
-	})
-
-	apigw.NewCfnIntegrationResponse(stack, jsii.String("connectionIdIntegrationResponse"), &apigw.CfnIntegrationResponseProps{
-		ApiId:                       webSocketApi.ApiId(),
-		IntegrationId:               route.IntegrationResponseId(),
-		IntegrationResponseKey:      jsii.String("/2\\d\\d/"),
-		TemplateSelectionExpression: jsii.String("\\$default"),
-		ResponseTemplates: map[string]*string{
-			"\\$default": jsii.String(string(connectRequestTemplate)),
-		},
 	})
 
 	webSocketApi.AddRoute(jsii.String("createCall"), &apigw.WebSocketRouteOptions{
@@ -178,6 +168,16 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 	for _, f := range functions {
 		gateway.GrantManagementApiAccess(f)
 	}
+
+	apigw.NewCfnIntegrationResponse(stack, jsii.String("connectionIdIntegrationResponse"), &apigw.CfnIntegrationResponseProps{
+		ApiId:                       webSocketApi.ApiId(),
+		IntegrationId:               jsii.String("connectionIdResponse"),
+		IntegrationResponseKey:      jsii.String("/2\\d\\d/"),
+		TemplateSelectionExpression: jsii.String("\\$default"),
+		ResponseTemplates: map[string]*string{
+			"\\$default": jsii.String(string(connectRequestTemplate)),
+		},
+	})
 
 	return stack
 }
