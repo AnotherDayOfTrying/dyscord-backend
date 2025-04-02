@@ -86,13 +86,13 @@ func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId str
 		expression.Name("connection_ids"),
 		expression.ListAppend(
 			expression.IfNotExists(expression.Name("connection_ids"), expression.Value([]string{})),
-			expression.Value(connectionId),
+			expression.Value([]string{connectionId}),
 		),
 	).Set(
 		expression.Name("connection_sdps"),
 		expression.ListAppend(
 			expression.IfNotExists(expression.Name("connection_sdps"), expression.Value([]SDP{sdp})),
-			expression.Value(sdp),
+			expression.Value([]SDP{sdp}),
 		),
 	)
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()

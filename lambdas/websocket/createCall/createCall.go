@@ -51,6 +51,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	sha1_hash := hex.EncodeToString(hasher.Sum(nil))[:6]
 	for { // loop until no collision
 		_, err := db.GetCall(ctx, sha1_hash)
+		log.Println(err, sha1_hash)
 		if err != nil { // error found then we are good
 			break
 		}
@@ -58,6 +59,8 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 		hasher.Write([]byte(time.Now().GoString()))
 		sha1_hash = hex.EncodeToString(hasher.Sum(nil))[:6]
 	}
+
+	log.Println("Created hash: ", sha1_hash)
 	err := db.CreateCall(ctx, dynamodbclient.Call{
 		CallId:         sha1_hash,
 		ConnectionIds:  []string{}, //make connectionids
