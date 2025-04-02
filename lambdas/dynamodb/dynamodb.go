@@ -78,7 +78,7 @@ func (db CallDatabase) GetCall(ctx context.Context, callId string) (Call, error)
 	return call, err
 }
 
-func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId string) (map[string]map[string]interface{}, error) {
+func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId string, sdp SDP) (map[string]map[string]interface{}, error) {
 	var response *dynamodb.UpdateItemOutput
 	var responseValues map[string]map[string]interface{}
 
@@ -87,6 +87,12 @@ func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId str
 		expression.ListAppend(
 			expression.IfNotExists(expression.Name("connection_ids"), expression.Value([]string{})),
 			expression.Value(connectionId),
+		),
+	).Set(
+		expression.Name("connection_sdps"),
+		expression.ListAppend(
+			expression.IfNotExists(expression.Name("connection_sdps"), expression.Value([]SDP{sdp})),
+			expression.Value(sdp),
 		),
 	)
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
@@ -114,9 +120,9 @@ func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId str
 	return responseValues, err
 }
 
-func (db CallDatabase) LeaveCall(ctx context.Context, call Call, connectionId string) (map[string]map[string]interface{}, error) {
+func (db CallDatabase) LeaveCall(ctx context.Context, call Call, connectionId string) (map[string]map[string]any, error) {
 	var response *dynamodb.UpdateItemOutput
-	var responseValues map[string]map[string]interface{}
+	var responseValues map[string]map[string]any
 
 	update := expression.Delete(
 		expression.Name("connection_ids"),

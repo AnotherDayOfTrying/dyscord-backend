@@ -18,13 +18,6 @@ import (
 	dynamodbclient "dyscord-backend/lambdas/dynamodb"
 )
 
-// we need to post to connection with connectionId
-
-type Request struct {
-	Type                       string `json:"type"`
-	SessionDescriptionProtocol string `json:"sdp"`
-}
-
 var (
 	db dynamodbclient.CallDatabase
 )
@@ -41,7 +34,7 @@ func init() {
 }
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var requestBody Request
+	var requestBody dynamodbclient.SDP
 	log.Printf("%v\n", request)
 	log.Printf("%v\n", ctx)
 	log.Printf("%v\n", request.Body)
@@ -55,11 +48,19 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	hasher := sha1.New()
 	hasher.Write([]byte(time.Now().GoString()))
 	sha1_hash := hex.EncodeToString(hasher.Sum(nil))[:6]
-
+	for { // loop until no collision
+		_, err := db.GetCall(ctx, sha1_hash)
+		if err == nil {
+			break
+		}
+		hasher.Reset()
+		hasher.Write([]byte(time.Now().GoString()))
+		sha1_hash = hex.EncodeToString(hasher.Sum(nil))[:6]
+	}
 	err := db.CreateCall(ctx, dynamodbclient.Call{
 		CallId:         sha1_hash,
 		ConnectionIds:  []string{}, //make connectionids
-		ConnectionSdps: []dynamodbclient.SDP{},
+		ConnectionSdps: []dynamodbclient.SDP{requestBody},
 		TTL:            time.Now().Add(time.Hour * 24).Unix(),
 	})
 
