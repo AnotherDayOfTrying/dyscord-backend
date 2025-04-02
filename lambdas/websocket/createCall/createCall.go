@@ -50,7 +50,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	sha1_hash := hex.EncodeToString(hasher.Sum(nil))[:6]
 	for { // loop until no collision
 		_, err := db.GetCall(ctx, sha1_hash)
-		if err == nil {
+		if err != nil { // error found then we are good
 			break
 		}
 		hasher.Reset()

@@ -29,7 +29,7 @@ func (call Call) GetKey() map[string]types.AttributeValue {
 		panic(err)
 	}
 
-	return map[string]types.AttributeValue{"S": callId}
+	return map[string]types.AttributeValue{"call_id": callId}
 }
 
 type CallDatabase struct {
