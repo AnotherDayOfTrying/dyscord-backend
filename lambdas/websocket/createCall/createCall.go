@@ -38,6 +38,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	log.Printf("%v\n", request)
 	log.Printf("%v\n", ctx)
 	log.Printf("%v\n", request.Body)
+	log.Printf("%v\n", []byte(request.Body))
 	log.Println("Unmarshalling")
 	if err := json.Unmarshal([]byte(request.Body), &requestBody); err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Could not parse body"}, nil
