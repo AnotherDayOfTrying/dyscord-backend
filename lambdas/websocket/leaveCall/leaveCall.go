@@ -14,8 +14,8 @@ import (
 )
 
 type Request struct {
-	CallId       string `dynamodbav="call_id"`
-	ConnectionId string `dynamodbav="connection_id"`
+	CallId       string `dynamodbav:"call_id"`
+	ConnectionId string `dynamodbav:"connection_id"`
 }
 
 var (

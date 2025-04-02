@@ -12,15 +12,15 @@ import (
 )
 
 type Call struct {
-	CallId         string   `dynamodbav:"call_id" json="call_id"`
-	ConnectionIds  []string `dynamodbav:"connection_ids" json="connection_ids"`
-	ConnectionSdps []SDP    `dynamodbav:"connection_sdps" json="connection_sdps"`
-	TTL            int64    `dynamodbav:"ttl" json="ttl"`
+	CallId         string   `dynamodbav:"call_id" json:"call_id"`
+	ConnectionIds  []string `dynamodbav:"connection_ids" json:"connection_ids"`
+	ConnectionSdps []SDP    `dynamodbav:"connection_sdps" json:"connection_sdps"`
+	TTL            int64    `dynamodbav:"ttl" json:"ttl"`
 }
 
 type SDP struct {
-	Type                       string `dynamodbav:"type" json="type"`
-	SessionDescriptionProtocol string `dynamodbav:"sdp" json="sdp"`
+	Type                       string `dynamodbav:"type" json:"type"`
+	SessionDescriptionProtocol string `dynamodbav:"sdp" json:"sdp"`
 }
 
 func (call Call) GetKey() map[string]types.AttributeValue {
