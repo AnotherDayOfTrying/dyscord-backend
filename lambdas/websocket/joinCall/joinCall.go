@@ -16,8 +16,8 @@ import (
 
 type Request struct {
 	dynamodbclient.SDP
-	CallId       string `dynamodbav="call_id"`
-	ConnectionId string `dynamodbav="connection_id"`
+	CallId       string `dynamodbav="call_id" json="call_id"`
+	ConnectionId string `dynamodbav="connection_id" json="connection_id"`
 }
 
 var (
@@ -34,6 +34,7 @@ func init() {
 		TableName: dyscordconfig.TABLENAME,
 	}
 }
+
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var requestBody Request
 
@@ -41,7 +42,12 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Could not parse body"}, nil
 	}
 
+	fmt.Printf("%v\n", requestBody)
+
 	response, err := db.GetCall(ctx, requestBody.CallId)
+
+	fmt.Printf("%v\n", response)
+
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 500, Body: err.Error()}, nil
 	}

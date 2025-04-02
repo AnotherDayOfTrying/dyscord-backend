@@ -73,7 +73,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	})
 
 	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Internal Sever Error"}, nil
+		return events.APIGatewayProxyResponse{StatusCode: 500, Body: err.Error()}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
