@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	dyscordconfig "dyscord-backend/config"
-	dynamodbclient "dyscord-backend/lambdas/dynamodb"
+	"dyscord-backend/lambdas/services"
 	"encoding/json"
 	"fmt"
 
@@ -14,12 +14,12 @@ import (
 )
 
 type Request struct {
-	CallId       string `dynamodbav:"call_id"`
-	ConnectionId string `dynamodbav:"connection_id"`
+	CallId       string `dynamodbav:"call_id" json:"call_id"`
+	ConnectionId string `dynamodbav:"connection_id" json:"connection_id"`
 }
 
 var (
-	db dynamodbclient.CallDatabase
+	db services.CallDatabase
 )
 
 func init() {
@@ -27,7 +27,7 @@ func init() {
 	if err != nil {
 		fmt.Println("Error loading config")
 	}
-	db = dynamodbclient.CallDatabase{
+	db = services.CallDatabase{
 		Client:    dynamodb.NewFromConfig(cfg),
 		TableName: dyscordconfig.TABLENAME,
 	}
@@ -37,7 +37,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	var requestBody Request
 
 	if err := json.Unmarshal([]byte(request.Body), &requestBody); err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Could not parse body"}, nil
+		return events.APIGatewayProxyResponse{StatusCode: 500, Body: err.Error()}, nil
 	}
 
 	call, err := db.GetCall(ctx, requestBody.CallId)

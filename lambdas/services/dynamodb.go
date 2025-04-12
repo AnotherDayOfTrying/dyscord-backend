@@ -1,4 +1,4 @@
-package dynamodbclient
+package services
 
 import (
 	"context"
@@ -78,9 +78,9 @@ func (db CallDatabase) GetCall(ctx context.Context, callId string) (Call, error)
 	return call, err
 }
 
-func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId string, sdp SDP) (map[string]map[string]interface{}, error) {
+func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId string, sdp SDP) (map[string]interface{}, error) {
 	var response *dynamodb.UpdateItemOutput
-	var responseValues map[string]map[string]interface{}
+	var responseValues map[string]interface{}
 
 	update := expression.Set(
 		expression.Name("connection_ids"),
@@ -120,9 +120,9 @@ func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId str
 	return responseValues, err
 }
 
-func (db CallDatabase) LeaveCall(ctx context.Context, call Call, connectionId string) (map[string]map[string]any, error) {
+func (db CallDatabase) LeaveCall(ctx context.Context, call Call, connectionId string) (map[string]any, error) {
 	var response *dynamodb.UpdateItemOutput
-	var responseValues map[string]map[string]any
+	var responseValues map[string]any
 
 	update := expression.Delete(
 		expression.Name("connection_ids"),

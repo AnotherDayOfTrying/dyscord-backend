@@ -15,11 +15,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 
 	dyscordconfig "dyscord-backend/config"
-	dynamodbclient "dyscord-backend/lambdas/dynamodb"
+	"dyscord-backend/lambdas/services"
 )
 
 var (
-	db dynamodbclient.CallDatabase
+	db services.CallDatabase
 )
 
 func init() {
@@ -27,14 +27,14 @@ func init() {
 	if err != nil {
 		fmt.Println("Error loading config")
 	}
-	db = dynamodbclient.CallDatabase{
+	db = services.CallDatabase{
 		Client:    dynamodb.NewFromConfig(cfg),
 		TableName: dyscordconfig.TABLENAME,
 	}
 }
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var requestBody dynamodbclient.SDP
+	var requestBody services.SDP
 	log.Printf("%v\n", request)
 	log.Printf("%v\n", ctx)
 	log.Printf("%v\n", request.Body)
@@ -50,9 +50,9 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	hasher.Write([]byte(time.Now().GoString()))
 	sha1_hash := hex.EncodeToString(hasher.Sum(nil))[:6]
 	for { // loop until no collision
-		_, err := db.GetCall(ctx, sha1_hash)
+		data, err := db.GetCall(ctx, sha1_hash)
 		log.Println(err, sha1_hash)
-		if err != nil { // error found then we are good
+		if data.CallId != sha1_hash { // we did not find it
 			break
 		}
 		hasher.Reset()
@@ -61,10 +61,10 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	}
 
 	log.Println("Created hash: ", sha1_hash)
-	err := db.CreateCall(ctx, dynamodbclient.Call{
+	err := db.CreateCall(ctx, services.Call{
 		CallId:         sha1_hash,
 		ConnectionIds:  []string{}, //make connectionids
-		ConnectionSdps: []dynamodbclient.SDP{requestBody},
+		ConnectionSdps: []services.SDP{requestBody},
 		TTL:            time.Now().Add(time.Hour * 24).Unix(),
 	})
 

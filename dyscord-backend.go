@@ -11,6 +11,7 @@ import (
 	apigw_integrations "github.com/aws/aws-cdk-go/awscdk/v2/awsapigatewayv2integrations"
 	dynamodb "github.com/aws/aws-cdk-go/awscdk/v2/awsdynamodb"
 	lambda "github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awslambdaeventsources"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslogs"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
@@ -37,6 +38,18 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		},
 		BillingMode:         dynamodb.BillingMode_PAY_PER_REQUEST,
 		TimeToLiveAttribute: jsii.String("ttl"),
+		Stream:              dynamodb.StreamViewType_NEW_IMAGE,
+	})
+
+	updateHandler := lambda.NewFunction(stack, jsii.String("update"), &lambda.FunctionProps{
+		Runtime:      lambda.Runtime_PROVIDED_AL2023(),
+		Handler:      jsii.String("bootstrap"),
+		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/connect", dir), nil),
+		Architecture: lambda.Architecture_ARM_64(),
+		LogRetention: awslogs.RetentionDays_ONE_WEEK,
+		Events: &[]lambda.IEventSource{awslambdaeventsources.NewDynamoEventSource(database, &awslambdaeventsources.DynamoEventSourceProps{
+			StartingPosition: lambda.StartingPosition_LATEST,
+		})},
 	})
 
 	connectHandler := lambda.NewFunction(stack, jsii.String("connect"), &lambda.FunctionProps{
@@ -168,6 +181,9 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 	for _, f := range functions {
 		gateway.GrantManagementApiAccess(f)
 	}
+
+	database.GrantStreamRead(updateHandler)
+	gateway.GrantManagementApiAccess(updateHandler)
 
 	return stack
 }
