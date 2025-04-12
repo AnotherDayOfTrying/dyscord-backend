@@ -51,8 +51,8 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	sha1_hash := hex.EncodeToString(hasher.Sum(nil))[:6]
 	for { // loop until no collision
 		data, err := db.GetCall(ctx, sha1_hash)
-		log.Println(err, sha1_hash)
-		if data.CallId != sha1_hash { // we did not find it
+		log.Println(data, err, sha1_hash)
+		if data.ConnectionIds == nil { // we did not find it
 			break
 		}
 		hasher.Reset()
