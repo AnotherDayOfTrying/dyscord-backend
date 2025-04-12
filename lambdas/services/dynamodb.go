@@ -127,12 +127,11 @@ func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId str
 }
 
 func (db CallDatabase) LeaveCall(ctx context.Context, call Call, connectionId string) (map[string]any, error) {
-	var response *dynamodb.UpdateItemOutput
 	var responseValues map[string]any
 
 	update := expression.Delete(
 		expression.Name("connection_ids"),
-		expression.Value(&types.AttributeValueMemberS{Value: connectionId}),
+		expression.Value(&types.AttributeValueMemberL{Value: []types.AttributeValue{&types.AttributeValueMemberS{Value: connectionId}}}),
 	)
 
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
@@ -156,12 +155,11 @@ func (db CallDatabase) LeaveCall(ctx context.Context, call Call, connectionId st
 	if err != nil {
 		log.Printf("Item could not build expression, %v", err)
 	} else {
-		response, err = db.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
+		response, err := db.Client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
 			TableName:                 aws.String(db.TableName),
 			Key:                       call.GetKey(),
 			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),
-			UpdateExpression:          expr.Update(),
 			ConditionExpression:       expr.Condition(),
 			ReturnValues:              types.ReturnValueUpdatedNew,
 		})
