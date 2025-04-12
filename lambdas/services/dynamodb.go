@@ -82,17 +82,23 @@ func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId str
 	var response *dynamodb.UpdateItemOutput
 	var responseValues map[string]interface{}
 
+	marshalledSdp, err := attributevalue.MarshalMap(sdp)
+
+	if err != nil {
+		log.Printf(err.Error())
+	}
+
 	update := expression.Set(
 		expression.Name("connection_ids"),
 		expression.ListAppend(
-			expression.IfNotExists(expression.Name("connection_ids"), expression.Value([]string{})),
-			expression.Value([]string{connectionId}),
+			expression.IfNotExists(expression.Name("connection_ids"), expression.Value([]string{connectionId})),
+			expression.Value(&types.AttributeValueMemberS{Value: connectionId}),
 		),
 	).Set(
 		expression.Name("connection_sdps"),
 		expression.ListAppend(
-			expression.IfNotExists(expression.Name("connection_sdps"), expression.Value([]SDP{sdp})),
-			expression.Value([]SDP{sdp}),
+			expression.IfNotExists(expression.Name("connection_sdps"), expression.Value(marshalledSdp)),
+			expression.Value(&types.AttributeValueMemberM{Value: marshalledSdp}),
 		),
 	)
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
@@ -126,7 +132,7 @@ func (db CallDatabase) LeaveCall(ctx context.Context, call Call, connectionId st
 
 	update := expression.Delete(
 		expression.Name("connection_ids"),
-		expression.Value(connectionId),
+		expression.Value(&types.AttributeValueMemberS{Value: connectionId}),
 	)
 
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
