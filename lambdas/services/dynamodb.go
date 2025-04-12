@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -12,13 +13,13 @@ import (
 )
 
 type Call struct {
-	CallId         string   `dynamodbav:"call_id" json:"call_id"`
-	ConnectionIds  []string `dynamodbav:"connection_ids" json:"connection_ids"`
-	ConnectionSdps []SDP    `dynamodbav:"connection_sdps" json:"connection_sdps"`
-	TTL            int64    `dynamodbav:"ttl" json:"ttl"`
+	CallId         string `dynamodbav:"call_id" json:"call_id"`
+	ConnectionSdps []SDP  `dynamodbav:"connection_sdps" json:"connection_sdps"`
+	TTL            int64  `dynamodbav:"ttl" json:"ttl"`
 }
 
 type SDP struct {
+	ConnectionId               string `dynamodbav:"connection_id" json:"connection_id"`
 	Type                       string `dynamodbav:"type" json:"type"`
 	SessionDescriptionProtocol string `dynamodbav:"sdp" json:"sdp"`
 }
@@ -129,9 +130,28 @@ func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId str
 func (db CallDatabase) LeaveCall(ctx context.Context, call Call, connectionId string) (map[string]any, error) {
 	var responseValues map[string]any
 
-	update := expression.Delete(
-		expression.Name("connection_ids"),
-		expression.Value(&types.AttributeValueMemberL{Value: []types.AttributeValue{&types.AttributeValueMemberS{Value: connectionId}}}),
+	originalCall, err := db.GetCall(ctx, call.CallId)
+
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	found := false
+	connectionIndex := -1
+	for index, value := range originalCall.ConnectionSdps {
+		if connectionId == value.ConnectionId {
+			found = true
+			connectionIndex = index
+			break
+		}
+	}
+
+	if !found {
+		return nil, nil
+	}
+
+	update := expression.Remove(
+		expression.Name(fmt.Sprintf("connection_ids[%d]", connectionIndex)),
 	)
 
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
@@ -161,7 +181,7 @@ func (db CallDatabase) LeaveCall(ctx context.Context, call Call, connectionId st
 			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),
 			ConditionExpression:       expr.Condition(),
-			ReturnValues:              types.ReturnValueUpdatedNew,
+			ReturnValues:              types.ReturnValueNone,
 		})
 		if err != nil {
 			log.Printf("Item could not be updated, %v", err)

@@ -16,8 +16,7 @@ import (
 
 type Request struct {
 	services.SDP
-	CallId       string `dynamodbav:"call_id" json:"call_id"`
-	ConnectionId string `dynamodbav:"connection_id" json:"connection_id"`
+	CallId string `dynamodbav:"call_id" json:"call_id"`
 }
 
 var (

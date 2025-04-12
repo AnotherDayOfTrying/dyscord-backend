@@ -41,7 +41,11 @@ func handler(ctx context.Context, request events.DynamoDBStreamRecord) error {
 		if err != nil {
 			return err
 		}
-		api.PostToConnections(ctx, call.ConnectionIds, value)
+		connectionIds := make([]string, len(call.ConnectionSdps))
+		for index, sdp := range call.ConnectionSdps {
+			connectionIds[index] = sdp.ConnectionId
+		}
+		api.PostToConnections(ctx, connectionIds, value)
 	} else {
 		return errors.New("could not unmarshall request")
 	}

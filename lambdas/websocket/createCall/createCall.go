@@ -52,7 +52,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	for { // loop until no collision
 		data, err := db.GetCall(ctx, sha1_hash)
 		log.Println(data, err, sha1_hash)
-		if data.ConnectionIds == nil { // we did not find it
+		if data.ConnectionSdps == nil { // we did not find it
 			break
 		}
 		hasher.Reset()
@@ -63,7 +63,6 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	log.Println("Created hash: ", sha1_hash)
 	err := db.CreateCall(ctx, services.Call{
 		CallId:         sha1_hash,
-		ConnectionIds:  []string{},
 		ConnectionSdps: []services.SDP{},
 		TTL:            time.Now().Add(time.Hour * 24).Unix(),
 	})
