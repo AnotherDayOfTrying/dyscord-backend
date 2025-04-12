@@ -85,20 +85,20 @@ func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId str
 	marshalledSdp, err := attributevalue.MarshalMap(sdp)
 
 	if err != nil {
-		log.Printf(err.Error())
+		log.Println(err.Error())
 	}
 
 	update := expression.Set(
 		expression.Name("connection_ids"),
 		expression.ListAppend(
-			expression.IfNotExists(expression.Name("connection_ids"), expression.Value([]string{connectionId})),
-			expression.Value(&types.AttributeValueMemberS{Value: connectionId}),
+			expression.IfNotExists(expression.Name("connection_ids"), expression.Value(&types.AttributeValueMemberL{Value: []types.AttributeValue{&types.AttributeValueMemberS{Value: connectionId}}})),
+			expression.Value(&types.AttributeValueMemberL{Value: []types.AttributeValue{&types.AttributeValueMemberS{Value: connectionId}}}),
 		),
 	).Set(
 		expression.Name("connection_sdps"),
 		expression.ListAppend(
-			expression.IfNotExists(expression.Name("connection_sdps"), expression.Value(marshalledSdp)),
-			expression.Value(&types.AttributeValueMemberM{Value: marshalledSdp}),
+			expression.IfNotExists(expression.Name("connection_sdps"), expression.Value(&types.AttributeValueMemberL{Value: []types.AttributeValue{&types.AttributeValueMemberM{Value: marshalledSdp}}})),
+			expression.Value(&types.AttributeValueMemberL{Value: []types.AttributeValue{&types.AttributeValueMemberM{Value: marshalledSdp}}}),
 		),
 	)
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
