@@ -61,7 +61,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	}
 
 	responseBody, err := json.Marshal(map[string]string{
-		"message": "Hello World!",
+		"message": fmt.Sprintf("Joined Call %v", requestBody.ConnectionId),
 	})
 
 	if err != nil {

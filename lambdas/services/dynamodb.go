@@ -90,12 +90,6 @@ func (db CallDatabase) JoinCall(ctx context.Context, call Call, connectionId str
 	}
 
 	update := expression.Set(
-		expression.Name("connection_ids"),
-		expression.ListAppend(
-			expression.IfNotExists(expression.Name("connection_ids"), expression.Value(&types.AttributeValueMemberL{Value: []types.AttributeValue{&types.AttributeValueMemberS{Value: connectionId}}})),
-			expression.Value(&types.AttributeValueMemberL{Value: []types.AttributeValue{&types.AttributeValueMemberS{Value: connectionId}}}),
-		),
-	).Set(
 		expression.Name("connection_sdps"),
 		expression.ListAppend(
 			expression.IfNotExists(expression.Name("connection_sdps"), expression.Value(&types.AttributeValueMemberL{Value: []types.AttributeValue{&types.AttributeValueMemberM{Value: marshalledSdp}}})),
@@ -147,11 +141,11 @@ func (db CallDatabase) LeaveCall(ctx context.Context, call Call, connectionId st
 	}
 
 	if !found {
-		return nil, nil
+		log.Println("Could not find any sdp that matches")
 	}
 
 	update := expression.Remove(
-		expression.Name(fmt.Sprintf("connection_ids[%d]", connectionIndex)),
+		expression.Name(fmt.Sprintf("connection_sdps[%v]", connectionIndex)),
 	)
 
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
@@ -170,7 +164,7 @@ func (db CallDatabase) LeaveCall(ctx context.Context, call Call, connectionId st
 			log.Printf("Item could not be updated, %v", err)
 		}
 	}
-	condition := expression.Name("connection_ids").Size().Equal(expression.Value(0))
+	condition := expression.Name("connection_sdps").Size().Equal(expression.Value(0))
 	expr, err = expression.NewBuilder().WithCondition(condition).Build()
 	if err != nil {
 		log.Printf("Item could not build expression, %v", err)

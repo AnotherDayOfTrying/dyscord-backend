@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -35,6 +36,26 @@ func handler(ctx context.Context, request events.DynamoDBStreamRecord) error {
 	var call services.Call
 	log.Println(request)
 	log.Println(ctx)
+	log.Println(request.NewImage)
+	val := reflect.ValueOf(request)
+	typ := reflect.TypeOf(request)
+
+	for i := 0; i < val.NumField(); i++ {
+		field := typ.Field(i)
+		value := val.Field(i)
+
+		fmt.Printf("%s: %v\n", field.Name, value.Interface())
+	}
+
+	val = reflect.ValueOf(request.NewImage)
+	typ = reflect.TypeOf(request.NewImage)
+
+	for i := 0; i < val.NumField(); i++ {
+		field := typ.Field(i)
+		value := val.Field(i)
+
+		fmt.Printf("%s: %v\n", field.Name, value.Interface())
+	}
 	if request, ok := any(request.NewImage).(map[string]types.AttributeValue); ok {
 		attributevalue.UnmarshalMap(request, &call)
 		value, err := json.Marshal(call.ConnectionSdps)

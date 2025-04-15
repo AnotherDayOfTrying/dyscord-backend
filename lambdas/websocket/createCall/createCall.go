@@ -34,18 +34,6 @@ func init() {
 }
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	// var requestBody services.SDP
-	// log.Printf("%v\n", request)
-	// log.Printf("%v\n", ctx)
-	// log.Printf("%v\n", request.Body)
-	// log.Printf("%v\n", []byte(request.Body))
-	// log.Println("Unmarshalling")
-	// if err := json.Unmarshal([]byte(request.Body), &requestBody); err != nil {
-	// 	return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Could not parse body"}, nil
-	// }
-
-	// log.Printf("%v", requestBody)
-
 	hasher := sha1.New()
 	hasher.Write([]byte(time.Now().GoString()))
 	sha1_hash := hex.EncodeToString(hasher.Sum(nil))[:6]
@@ -72,7 +60,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	}
 
 	responseBody, err := json.Marshal(map[string]string{
-		"message": "Hello World!",
+		"call_id": sha1_hash,
 	})
 
 	if err != nil {
