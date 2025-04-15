@@ -44,7 +44,7 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 	updateHandler := lambda.NewFunction(stack, jsii.String("update"), &lambda.FunctionProps{
 		Runtime:      lambda.Runtime_PROVIDED_AL2023(),
 		Handler:      jsii.String("bootstrap"),
-		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/connect", dir), nil),
+		Code:         lambda.Code_FromAsset(jsii.Sprintf("%v/lambdas/websocket/update", dir), nil),
 		Architecture: lambda.Architecture_ARM_64(),
 		LogRetention: awslogs.RetentionDays_ONE_WEEK,
 		Events: &[]lambda.IEventSource{awslambdaeventsources.NewDynamoEventSource(database, &awslambdaeventsources.DynamoEventSourceProps{

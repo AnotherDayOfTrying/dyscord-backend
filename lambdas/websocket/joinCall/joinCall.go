@@ -54,6 +54,12 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 		return events.APIGatewayProxyResponse{StatusCode: 500, Body: err.Error()}, nil
 	}
 
+	for _, sdp := range response.ConnectionSdps {
+		if requestBody.ConnectionId == sdp.ConnectionId {
+			return events.APIGatewayProxyResponse{StatusCode: 500, Body: fmt.Sprintf("Connection %v already joined the call %v", sdp.ConnectionId, requestBody.CallId)}, nil
+		}
+	}
+
 	_, err = db.JoinCall(ctx, response, requestBody.ConnectionId, requestBody.SDP)
 
 	if err != nil {
