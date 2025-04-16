@@ -32,8 +32,13 @@ func UnmarshalStreamImage(attribute map[string]events.DynamoDBAttributeValue, ou
 			return marshalErr
 		}
 
-		json.Unmarshal(bytes, &dbAttr)
 		log.Println(dbAttr)
+		err := json.Unmarshal(bytes, &dbAttr)
+		if err != nil {
+			return err
+		}
+		log.Println(dbAttr)
+		log.Println(&dbAttr)
 		dbAttrMap[k] = dbAttr
 		log.Println(dbAttrMap)
 	}
@@ -74,7 +79,7 @@ func handler(ctx context.Context, request events.DynamoDBEvent) error {
 			err := UnmarshalStreamImage(record.Change.NewImage, &call)
 
 			if err != nil {
-				log.Println("Could not unmarshal map")
+				log.Println(err.Error())
 			}
 
 			test := reflect.ValueOf(call)
