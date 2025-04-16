@@ -54,16 +54,26 @@ func handler(ctx context.Context, request events.DynamoDBEvent) error {
 					log.Println("Could not unmarshal map")
 				}
 				connectionIds := make([]string, len(call.ConnectionSdps))
+				values := make([]interface{}, len(call.ConnectionSdps))
 				for index, sdp := range call.ConnectionSdps {
 					connectionIds[index] = sdp.ConnectionId
+					values[index] = struct {
+						Type                       string `dynamodbav:"type" json:"type"`
+						SessionDescriptionProtocol string `dynamodbav:"sdp" json:"sdp"`
+					}{
+						Type:                       sdp.Type,
+						SessionDescriptionProtocol: sdp.SessionDescriptionProtocol,
+					}
 				}
 
-				value, err := json.Marshal(call.ConnectionSdps)
+				value, err := json.Marshal(values)
 
 				if err != nil {
 					log.Println("Could not marshal connection sdps")
 				}
-
+				log.Println(connectionIds)
+				log.Println(values)
+				log.Println(value)
 				api.PostToConnections(ctx, connectionIds, value)
 			}
 		}
