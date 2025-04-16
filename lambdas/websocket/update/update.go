@@ -29,11 +29,21 @@ func UnmarshalStreamImage(attribute map[string]events.DynamoDBAttributeValue, ou
 		if marshalErr != nil {
 			return marshalErr
 		}
+		log.Println("Bytes:", bytes)
+		log.Println(dbAttr)
 
 		json.Unmarshal(bytes, &dbAttr)
+
+		log.Println(dbAttr)
+		// // TODO: work on this and fix it!!!!
+		// for _, field := range reflect.VisibleFields(reflect.TypeOf(out)) {
+		// 	if field.Tag.Get("json") == k {
+		// 		dbAttrMap[field.Name] = dbAttr
+		// 	}
+		// }
 		dbAttrMap[k] = dbAttr
 	}
-
+	log.Println(dbAttrMap)
 	return attributevalue.UnmarshalMap(dbAttrMap, &out)
 
 }
