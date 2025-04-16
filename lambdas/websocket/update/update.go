@@ -17,6 +17,27 @@ import (
 	"dyscord-backend/lambdas/services"
 )
 
+func UnmarshalStreamImage(attribute map[string]events.DynamoDBAttributeValue, out interface{}) error {
+
+	dbAttrMap := make(map[string]dynamodbtypes.AttributeValue)
+
+	for k, v := range attribute {
+
+		var dbAttr dynamodbtypes.AttributeValue
+
+		bytes, marshalErr := v.MarshalJSON()
+		if marshalErr != nil {
+			return marshalErr
+		}
+
+		json.Unmarshal(bytes, &dbAttr)
+		dbAttrMap[k] = dbAttr
+	}
+
+	return attributevalue.UnmarshalMap(dbAttrMap, out)
+
+}
+
 var (
 	api services.APIGatewayManagementClient
 )
@@ -47,35 +68,40 @@ func handler(ctx context.Context, request events.DynamoDBEvent) error {
 			fmt.Println(types.Field(i).Index[0], types.Field(i).Name, values.Field(i))
 		}
 		if record.EventName == "MODIFY" && record.Change.StreamViewType == "NEW_IMAGE" {
-			if image, ok := any(record.Change.NewImage).(map[string]dynamodbtypes.AttributeValue); ok {
-				err := attributevalue.UnmarshalMap(image, &call)
+			err := UnmarshalStreamImage(record.Change.NewImage, &call)
 
-				if err != nil {
-					log.Println("Could not unmarshal map")
-				}
-				connectionIds := make([]string, len(call.ConnectionSdps))
-				values := make([]interface{}, len(call.ConnectionSdps))
-				for index, sdp := range call.ConnectionSdps {
-					connectionIds[index] = sdp.ConnectionId
-					values[index] = struct {
-						Type                       string `dynamodbav:"type" json:"type"`
-						SessionDescriptionProtocol string `dynamodbav:"sdp" json:"sdp"`
-					}{
-						Type:                       sdp.Type,
-						SessionDescriptionProtocol: sdp.SessionDescriptionProtocol,
-					}
-				}
-
-				value, err := json.Marshal(values)
-
-				if err != nil {
-					log.Println("Could not marshal connection sdps")
-				}
-				log.Println(connectionIds)
-				log.Println(values)
-				log.Println(value)
-				api.PostToConnections(ctx, connectionIds, value)
+			if err != nil {
+				log.Println("Could not unmarshal map")
 			}
+
+			test := reflect.ValueOf(call)
+			types := test.Type()
+			for i := 0; i < test.NumField(); i++ {
+				fmt.Println(types.Field(i).Index[0], types.Field(i).Name, test.Field(i))
+			}
+
+			connectionIds := make([]string, len(call.ConnectionSdps))
+			values := make([]interface{}, len(call.ConnectionSdps))
+			for index, sdp := range call.ConnectionSdps {
+				connectionIds[index] = sdp.ConnectionId
+				values[index] = struct {
+					Type                       string `dynamodbav:"type" json:"type"`
+					SessionDescriptionProtocol string `dynamodbav:"sdp" json:"sdp"`
+				}{
+					Type:                       sdp.Type,
+					SessionDescriptionProtocol: sdp.SessionDescriptionProtocol,
+				}
+			}
+
+			value, err := json.Marshal(values)
+
+			if err != nil {
+				log.Println("Could not marshal connection sdps")
+			}
+			log.Println(connectionIds)
+			log.Println(values)
+			log.Println(value)
+			api.PostToConnections(ctx, connectionIds, value)
 		}
 	}
 	return nil
