@@ -20,9 +20,9 @@ import (
 func UnmarshalStreamImage(attribute map[string]events.DynamoDBAttributeValue, out interface{}) error {
 
 	dbAttrMap := make(map[string]dynamodbtypes.AttributeValue)
-
+	log.Println("Unmarshalling")
 	for k, v := range attribute {
-
+		log.Println(k, v)
 		var dbAttr dynamodbtypes.AttributeValue
 
 		bytes, marshalErr := v.MarshalJSON()
@@ -34,7 +34,7 @@ func UnmarshalStreamImage(attribute map[string]events.DynamoDBAttributeValue, ou
 		dbAttrMap[k] = dbAttr
 	}
 
-	return attributevalue.UnmarshalMap(dbAttrMap, out)
+	return attributevalue.UnmarshalMap(dbAttrMap, &out)
 
 }
 
