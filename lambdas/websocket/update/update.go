@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/apigatewaymanagementapi"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	dynamodbtypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 
 	"dyscord-backend/lambdas/services"
 )
@@ -32,9 +33,21 @@ func init() {
 
 func handler(ctx context.Context, request events.DynamoDBEvent) error {
 	var call services.Call
+	log.Println(request)
+	values := reflect.ValueOf(request)
+	types := values.Type()
+	for i := 0; i < values.NumField(); i++ {
+		fmt.Println(types.Field(i).Index[0], types.Field(i).Name, values.Field(i))
+	}
 	for _, record := range request.Records {
+		log.Println(record)
+		values := reflect.ValueOf(record)
+		types := values.Type()
+		for i := 0; i < values.NumField(); i++ {
+			fmt.Println(types.Field(i).Index[0], types.Field(i).Name, values.Field(i))
+		}
 		if record.EventName == "MODIFY" && record.Change.StreamViewType == "NEW_IMAGE" {
-			if image, ok := any(record.Change.NewImage).(map[string]types.AttributeValue); ok {
+			if image, ok := any(record.Change.NewImage).(map[string]dynamodbtypes.AttributeValue); ok {
 				err := attributevalue.UnmarshalMap(image, &call)
 
 				if err != nil {
