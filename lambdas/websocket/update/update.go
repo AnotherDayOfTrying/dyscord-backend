@@ -7,44 +7,14 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/apigatewaymanagementapi"
-	dynamodbtypes "github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodbstreams"
 
 	"dyscord-backend/lambdas/services"
 )
-
-func UnmarshalStreamImage(attribute map[string]events.DynamoDBAttributeValue, out interface{}) error {
-
-	dbAttrMap := make(map[string]dynamodbtypes.AttributeValue)
-
-	for k, v := range attribute {
-		log.Println(k, v)
-		var dbAttr dynamodbtypes.AttributeValue
-
-		bytes, marshalErr := v.MarshalJSON()
-		log.Println("Bytes:", bytes)
-		log.Println("String:", string(bytes))
-		if marshalErr != nil {
-			return marshalErr
-		}
-
-		log.Println(dbAttr)
-		err := json.Unmarshal(bytes, &dbAttr)
-		if err != nil {
-			return err
-		}
-		log.Println(dbAttr)
-		log.Println(&dbAttr)
-		dbAttrMap[k] = dbAttr
-		log.Println(dbAttrMap)
-	}
-
-	return attributevalue.UnmarshalMap(dbAttrMap, out)
-}
 
 var (
 	api services.APIGatewayManagementClient
@@ -60,7 +30,7 @@ func init() {
 	}
 }
 
-func handler(ctx context.Context, request events.DynamoDBEvent) error {
+func handler(ctx context.Context, request dynamodbstreams.GetRecordsOutput) error {
 	var call services.Call
 	log.Println(request)
 	values := reflect.ValueOf(request)
@@ -75,8 +45,13 @@ func handler(ctx context.Context, request events.DynamoDBEvent) error {
 		for i := 0; i < values.NumField(); i++ {
 			fmt.Println(types.Field(i).Index[0], types.Field(i).Name, values.Field(i))
 		}
-		if record.EventName == "MODIFY" && record.Change.StreamViewType == "NEW_IMAGE" {
-			err := UnmarshalStreamImage(record.Change.NewImage, &call)
+		if record.EventName == "MODIFY" && record.Dynamodb.StreamViewType == "NEW_IMAGE" {
+			newImage, err := attributevalue.FromDynamoDBStreamsMap(record.Dynamodb.NewImage)
+			log.Println(newImage)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			err = attributevalue.UnmarshalMap(newImage, &call)
 
 			if err != nil {
 				log.Println(err.Error())
