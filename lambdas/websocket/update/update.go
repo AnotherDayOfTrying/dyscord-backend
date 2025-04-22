@@ -53,34 +53,28 @@ func extractVal(v events.DynamoDBAttributeValue) interface{} {
 	case events.DataTypeNull:
 		val = nil
 	case events.DataTypeList:
-		list := make([]interface{}, len(v.List()))
+		list := []interface{}{}
 		for _, item := range v.List() {
 			list = append(list, extractVal(item))
 		}
 		val = list
 	case events.DataTypeMap:
-		mapAttr := make(map[string]interface{}, len(v.Map()))
+		mapAttr := map[string]interface{}{}
 		for k, v := range v.Map() {
 			mapAttr[k] = extractVal(v)
 		}
 		val = mapAttr
 	case events.DataTypeBinarySet:
-		set := make([][]byte, len(v.BinarySet()))
-		for _, item := range v.BinarySet() {
-			set = append(set, item)
-		}
+		set := [][]byte{}
+		set = append(set, v.BinarySet()...)
 		val = set
 	case events.DataTypeNumberSet:
-		set := make([]string, len(v.NumberSet()))
-		for _, item := range v.NumberSet() {
-			set = append(set, item)
-		}
+		set := []string{}
+		set = append(set, v.NumberSet()...)
 		val = set
 	case events.DataTypeStringSet:
-		set := make([]string, len(v.StringSet()))
-		for _, item := range v.StringSet() {
-			set = append(set, item)
-		}
+		set := []string{}
+		set = append(set, v.StringSet()...)
 		val = set
 	}
 	return val
@@ -105,6 +99,10 @@ func handler(ctx context.Context, request events.DynamoDBEvent) error {
 			newImage, err := UnmarshalStreamImage(record.Change.NewImage)
 			if err != nil {
 				log.Println(err.Error())
+			}
+			log.Println(newImage)
+			for k, v := range newImage {
+				log.Println(k, v)
 			}
 			newerImage, err := attributevalue.MarshalMap(newImage)
 			log.Println(newerImage)
