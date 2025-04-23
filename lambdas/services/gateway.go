@@ -20,8 +20,6 @@ func (c *APIGatewayManagementClient) PostToConnections(ctx context.Context, conn
 		})
 
 		log.Println(output)
-		log.Println(connectionId)
-		log.Println(data)
 		if err != nil {
 			log.Fatal(err.Error())
 		}

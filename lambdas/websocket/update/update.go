@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"reflect"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -87,44 +86,22 @@ func extractVal(v events.DynamoDBAttributeValue) interface{} {
 
 func handler(ctx context.Context, request events.DynamoDBEvent) error {
 	var call services.Call
-	log.Println(request)
-	values := reflect.ValueOf(request)
-	types := values.Type()
-	for i := 0; i < values.NumField(); i++ {
-		fmt.Println(types.Field(i).Index[0], types.Field(i).Name, values.Field(i))
-	}
 	for _, record := range request.Records {
-		log.Println(record)
-		values := reflect.ValueOf(record)
-		types := values.Type()
-		for i := 0; i < values.NumField(); i++ {
-			fmt.Println(types.Field(i).Index[0], types.Field(i).Name, values.Field(i))
-		}
 		if record.EventName == "MODIFY" && record.Change.StreamViewType == "NEW_IMAGE" {
 			newImage, err := UnmarshalStreamImage(record.Change.NewImage)
 			if err != nil {
 				log.Println(err.Error())
 			}
-			log.Println(newImage)
 			for k, v := range newImage {
 				log.Println(k, v)
 			}
 			newerImage, err := attributevalue.MarshalMap(newImage)
-			log.Println(newerImage)
-			for k, v := range newerImage {
-				log.Println(k, v)
-			}
 			if err != nil {
 				log.Println(err.Error())
 			}
 
 			attributevalue.UnmarshalMap(newerImage, &call)
 
-			test := reflect.ValueOf(call)
-			types := test.Type()
-			for i := 0; i < test.NumField(); i++ {
-				fmt.Println(types.Field(i).Index[0], types.Field(i).Name, test.Field(i))
-			}
 			connectionIds := make([]string, len(call.ConnectionSdps))
 			values := make([]interface{}, len(call.ConnectionSdps))
 			for index, sdp := range call.ConnectionSdps {
@@ -143,9 +120,6 @@ func handler(ctx context.Context, request events.DynamoDBEvent) error {
 			if err != nil {
 				log.Println("Could not marshal connection sdps")
 			}
-			log.Println(connectionIds)
-			log.Println(values)
-			log.Println(value)
 			api.PostToConnections(ctx, connectionIds, value)
 		}
 	}
