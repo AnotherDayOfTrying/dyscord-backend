@@ -13,6 +13,7 @@ import (
 	lambda "github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambdaeventsources"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslogs"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
@@ -50,6 +51,9 @@ func NewDyscordBackendStack(scope constructs.Construct, id string, props *Dyscor
 		Events: &[]lambda.IEventSource{awslambdaeventsources.NewDynamoEventSource(database, &awslambdaeventsources.DynamoEventSourceProps{
 			StartingPosition: lambda.StartingPosition_LATEST,
 		})},
+		Environment: &map[string]*string{
+			"AWS_ENDPOINT": aws.String(os.Getenv("AWS_ENDPOINT")),
+		},
 	})
 
 	connectHandler := lambda.NewFunction(stack, jsii.String("connect"), &lambda.FunctionProps{

@@ -22,6 +22,8 @@ jobs:
               run: go get
             - name: build lambdas
               run: for i in $(ls -d */); do GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o ./${i%%/}/bootstrap ./${i%%/}/${i%%/}.go; done
+              env:
+                AWS_ENDPOINT: ${{ secrets.AWS_ENDPOINT }}
               working-directory: ./lambdas/websocket
             - name: cache lambdas
               uses: actions/cache@v4

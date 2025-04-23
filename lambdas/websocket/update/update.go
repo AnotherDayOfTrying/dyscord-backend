@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/apigatewaymanagementapi"
@@ -22,6 +24,9 @@ var (
 
 func init() {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg.BaseEndpoint = aws.String(os.Getenv("AWS_ENDPOINT"))
+	cfg.Region = "us-east-2"
+
 	if err != nil {
 		fmt.Println("Error loading config")
 	}
