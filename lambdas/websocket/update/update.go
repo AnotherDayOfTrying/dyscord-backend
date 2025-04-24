@@ -115,7 +115,10 @@ func handler(ctx context.Context, request events.DynamoDBEvent) error {
 				}
 			}
 
-			value, err := json.Marshal(values)
+			value, err := json.Marshal(map[string]any{
+				"action": "update",
+				"data":   values,
+			})
 
 			if err != nil {
 				log.Println("Could not marshal connection sdps")

@@ -53,7 +53,8 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	}
 
 	responseBody, err := json.Marshal(map[string]string{
-		"message": "Successfully Left Call",
+		"action": "leaveCall",
+		"data":   "Successfully Left Call",
 	})
 
 	if err != nil {

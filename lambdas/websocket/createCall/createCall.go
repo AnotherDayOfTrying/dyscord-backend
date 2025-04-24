@@ -59,8 +59,11 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 		return events.APIGatewayProxyResponse{StatusCode: 500, Body: err.Error()}, nil
 	}
 
-	responseBody, err := json.Marshal(map[string]string{
-		"call_id": sha1_hash,
+	responseBody, err := json.Marshal(map[string]any{
+		"action": "createCall",
+		"data": map[string]string{
+			"call_id": sha1_hash,
+		},
 	})
 
 	if err != nil {
